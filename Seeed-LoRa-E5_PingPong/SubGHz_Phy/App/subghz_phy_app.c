@@ -32,6 +32,10 @@
 #include "app_version.h"
 #include "subghz_phy_version.h"
 #include "radio_board_if.h"
+#include "usart.h"
+#include <stdio.h>
+#include <string.h>
+#include "radio_driver.h"
 
 /* USER CODE END Includes */
 
@@ -145,6 +149,11 @@ static void OnRxError(void);
   */
 static void PingPong_Process(void);
 
+/**
+  * @brief Print current radio debug information over UART
+  */
+void radio_debug_status(void);
+
 /* USER CODE END PFP */
 
 /* Exported functions ---------------------------------------------------------*/
@@ -188,6 +197,8 @@ void SubghzApp_Init(void)
            "RF_FREQUENCY=%u Hz, TX_OUTPUT_POWER=%ddBm\r\n",
            (unsigned int)RF_FREQUENCY, TX_OUTPUT_POWER);
 
+  radio_debug_status();
+
 
   /* USER CODE BEGIN SubghzApp_Init_2 */
   /*calculate random delay for synchronization*/
@@ -195,6 +206,7 @@ void SubghzApp_Init(void)
 
   /* Radio Set frequency */
   Radio.SetChannel(RF_FREQUENCY);
+  radio_debug_status();
 
   /* Radio configuration */
 #if ((USE_MODEM_LORA == 1) && (USE_MODEM_FSK == 0))
@@ -260,6 +272,7 @@ static void OnTxDone(void)
   APP_LOG(TS_ON, VLEVEL_L, "OnTxDone\n\r");
   /* Update the State of the FSM*/
   State = TX;
+  radio_debug_status();
   /* Run PingPong process in background*/
   UTIL_SEQ_SetTask((1 << CFG_SEQ_Task_SubGHz_Phy_App_Process), CFG_SEQ_Prio_0);
   /* USER CODE END OnTxDone */
@@ -278,6 +291,7 @@ static void OnRxDone(uint8_t *payload, uint16_t size, int16_t rssi, int8_t LoraS
   APP_LOG(TS_ON, VLEVEL_L, "RssiValue=%d dBm, Cfo=%dkHz\n\r", rssi, LoraSnr_FskCfo);
   SnrValue = 0; /*not applicable in GFSK*/
 #endif /* USE_MODEM_LORA | USE_MODEM_FSK */
+  radio_debug_status();
   /* Update the State of the FSM*/
   State = RX;
   /* Clear BufferRx*/
@@ -312,6 +326,7 @@ static void OnTxTimeout(void)
   APP_LOG(TS_ON, VLEVEL_L, "OnTxTimeout\n\r");
   /* Update the State of the FSM*/
   State = TX_TIMEOUT;
+  radio_debug_status();
   /* Run PingPong process in background*/
   UTIL_SEQ_SetTask((1 << CFG_SEQ_Task_SubGHz_Phy_App_Process), CFG_SEQ_Prio_0);
   /* USER CODE END OnTxTimeout */
@@ -323,6 +338,7 @@ static void OnRxTimeout(void)
   APP_LOG(TS_ON, VLEVEL_L, "OnRxTimeout\n\r");
   /* Update the State of the FSM*/
   State = RX_TIMEOUT;
+  radio_debug_status();
   /* Run PingPong process in background*/
   UTIL_SEQ_SetTask((1 << CFG_SEQ_Task_SubGHz_Phy_App_Process), CFG_SEQ_Prio_0);
   /* USER CODE END OnRxTimeout */
@@ -334,6 +350,7 @@ static void OnRxError(void)
   APP_LOG(TS_ON, VLEVEL_L, "OnRxError\n\r");
   /* Update the State of the FSM*/
   State = RX_ERROR;
+  radio_debug_status();
   /* Run PingPong process in background*/
   UTIL_SEQ_SetTask((1 << CFG_SEQ_Task_SubGHz_Phy_App_Process), CFG_SEQ_Prio_0);
   /* USER CODE END OnRxError */
@@ -438,5 +455,34 @@ static void PingPong_Process(void)
   }
 }
 
+void radio_debug_status(void)
+{
+  char buf[128];
+
+  uint8_t version = SUBGRF_ReadRegister(0x0918);
+  sprintf(buf, "Radio REG_VERSION: 0x%02X\r\n", version);
+  HAL_UART_Transmit(&huart1, (uint8_t *)buf, strlen(buf), HAL_MAX_DELAY);
+
+  uint8_t mode = SUBGRF_GetOperatingMode();
+  sprintf(buf, "Radio mode: 0x%02X\r\n", mode);
+  HAL_UART_Transmit(&huart1, (uint8_t *)buf, strlen(buf), HAL_MAX_DELAY);
+
+  PacketStatus_t status;
+  SUBGRF_GetPacketStatus(&status);
+  sprintf(buf, "RSSI: %d dBm, SNR: %d dB\r\n",
+          status.Params.LoRa.RssiPkt,
+          status.Params.LoRa.SnrPkt);
+  HAL_UART_Transmit(&huart1, (uint8_t *)buf, strlen(buf), HAL_MAX_DELAY);
+
+  uint32_t freq = RF_FREQUENCY;
+  sprintf(buf, "Frequency: %lu Hz\r\n", (unsigned long)freq);
+  HAL_UART_Transmit(&huart1, (uint8_t *)buf, strlen(buf), HAL_MAX_DELAY);
+
+  SUBGRF_SetStandby(STDBY_RC);
+  HAL_Delay(10);
+  mode = SUBGRF_GetOperatingMode();
+  sprintf(buf, "After standby mode: 0x%02X\r\n", mode);
+  HAL_UART_Transmit(&huart1, (uint8_t *)buf, strlen(buf), HAL_MAX_DELAY);
+}
 
 /* USER CODE END PrFD */

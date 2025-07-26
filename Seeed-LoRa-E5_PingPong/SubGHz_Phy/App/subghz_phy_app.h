@@ -92,6 +92,8 @@ void SubghzApp_Init(void);
 
 /* USER CODE BEGIN EFP */
 
+void radio_debug_status(void);
+
 /* USER CODE END EFP */
 
 #ifdef __cplusplus
