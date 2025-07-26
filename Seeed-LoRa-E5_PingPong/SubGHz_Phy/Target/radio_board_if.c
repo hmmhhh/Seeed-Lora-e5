@@ -84,10 +84,7 @@ int32_t RBI_Init(void)
   HAL_GPIO_WritePin(RF_SW_CTRL2_GPIO_PORT, RF_SW_CTRL2_PIN, GPIO_PIN_RESET);
 
   gpio_init.Pin = RF_TCXO_VCC_PIN;
-  gpio_init.Mode = GPIO_MODE_ANALOG;
-  gpio_init.Pull = GPIO_NOPULL;
-  gpio_init.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(RF_TCXO_VCC_GPIO_PORT, &gpio_init);
+
   LL_RCC_HSE_EnableTcxo();
 
   return 0;
