@@ -20,6 +20,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "radio_board_if.h"
+#include "stm32wlxx_ll_rcc.h"
 
 /* USER CODE BEGIN Includes */
 
@@ -83,9 +84,11 @@ int32_t RBI_Init(void)
   HAL_GPIO_WritePin(RF_SW_CTRL2_GPIO_PORT, RF_SW_CTRL2_PIN, GPIO_PIN_RESET);
 
   gpio_init.Pin = RF_TCXO_VCC_PIN;
+  gpio_init.Mode = GPIO_MODE_ANALOG;
+  gpio_init.Pull = GPIO_NOPULL;
   gpio_init.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(RF_TCXO_VCC_GPIO_PORT, &gpio_init);
-  HAL_GPIO_WritePin(RF_TCXO_VCC_GPIO_PORT, RF_TCXO_VCC_PIN, GPIO_PIN_SET);
+  LL_RCC_HSE_EnableTcxo();
 
   return 0;
 #endif  /* USE_BSP_DRIVER  */
@@ -103,6 +106,7 @@ int32_t RBI_DeInit(void)
   HAL_GPIO_WritePin(RF_SW_CTRL2_GPIO_PORT, RF_SW_CTRL2_PIN, GPIO_PIN_RESET);
   HAL_GPIO_DeInit(RF_SW_CTRL1_GPIO_PORT, RF_SW_CTRL1_PIN);
   HAL_GPIO_DeInit(RF_SW_CTRL2_GPIO_PORT, RF_SW_CTRL2_PIN);
+  LL_RCC_HSE_DisableTcxo();
   HAL_GPIO_DeInit(RF_TCXO_VCC_GPIO_PORT, RF_TCXO_VCC_PIN);
   return 0;
 #endif  /* USE_BSP_DRIVER */
