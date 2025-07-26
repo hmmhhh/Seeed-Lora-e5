@@ -32,6 +32,7 @@
 #include "app_version.h"
 #include "subghz_phy_version.h"
 #include "radio_board_if.h"
+#include "usart.h"
 
 /* USER CODE END Includes */
 
@@ -145,6 +146,11 @@ static void OnRxError(void);
   */
 static void PingPong_Process(void);
 
+/**
+  * @brief Print current radio debug information over UART
+  */
+static void DebugPrintRadioStatus(void);
+
 /* USER CODE END PFP */
 
 /* Exported functions ---------------------------------------------------------*/
@@ -195,6 +201,7 @@ void SubghzApp_Init(void)
 
   /* Radio Set frequency */
   Radio.SetChannel(RF_FREQUENCY);
+  DebugPrintRadioStatus();
 
   /* Radio configuration */
 #if ((USE_MODEM_LORA == 1) && (USE_MODEM_FSK == 0))
@@ -438,5 +445,31 @@ static void PingPong_Process(void)
   }
 }
 
+static void DebugPrintRadioStatus(void)
+{
+  char buf[64];
+  uint8_t mode = SUBGRF_GetOperatingMode();
+  sprintf(buf, "MODE: 0x%02X\r\n", mode);
+  HAL_UART_Transmit(&huart1, (uint8_t *)buf, strlen(buf), HAL_MAX_DELAY);
+
+  uint8_t reg = SUBGRF_ReadRegister(REG_LR_PACKETPARAMS);
+  sprintf(buf, "PACKETPARAMS: 0x%02X\r\n", reg);
+  HAL_UART_Transmit(&huart1, (uint8_t *)buf, strlen(buf), HAL_MAX_DELAY);
+
+  PacketStatus_t pkt;
+  SUBGRF_GetPacketStatus(&pkt);
+  if(pkt.packetType == PACKET_TYPE_LORA)
+  {
+    sprintf(buf, "RSSI:%d dBm SNR:%d dB FE:%ld\r\n",
+            pkt.Params.LoRa.RssiPkt,
+            pkt.Params.LoRa.SnrPkt,
+            pkt.Params.LoRa.FreqError);
+  }
+  else
+  {
+    sprintf(buf, "RSSI:%d dBm\r\n", pkt.Params.Gfsk.RssiAvg);
+  }
+  HAL_UART_Transmit(&huart1, (uint8_t *)buf, strlen(buf), HAL_MAX_DELAY);
+}
 
 /* USER CODE END PrFD */
