@@ -33,6 +33,9 @@
 #include "subghz_phy_version.h"
 #include "radio_board_if.h"
 #include "usart.h"
+#include <stdio.h>
+#include <string.h>
+#include "radio_driver.h"
 
 /* USER CODE END Includes */
 
