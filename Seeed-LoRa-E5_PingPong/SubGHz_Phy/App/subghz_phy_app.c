@@ -29,6 +29,7 @@
 #include "stm32_timer.h"
 #include "stm32_seq.h"
 #include "utilities_def.h"
+
 #include "app_version.h"
 #include "subghz_phy_version.h"
 #include "radio_board_if.h"
@@ -36,6 +37,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "radio_driver.h"
+
 
 /* USER CODE END Includes */
 
@@ -154,6 +156,11 @@ static void PingPong_Process(void);
   */
 void radio_debug_status(void);
 
+/**
+  * @brief Print current radio debug information over UART
+  */
+static void DebugPrintRadioStatus(void);
+
 /* USER CODE END PFP */
 
 /* Exported functions ---------------------------------------------------------*/
@@ -204,9 +211,11 @@ void SubghzApp_Init(void)
   /*calculate random delay for synchronization*/
   random_delay = (Radio.Random()) >> 22; /*10bits random e.g. from 0 to 1023 ms*/
 
+
   /* Radio Set frequency */
   Radio.SetChannel(RF_FREQUENCY);
   radio_debug_status();
+
 
   /* Radio configuration */
 #if ((USE_MODEM_LORA == 1) && (USE_MODEM_FSK == 0))
@@ -266,6 +275,7 @@ void SubghzApp_Init(void)
 /* USER CODE END EF */
 
 /* Private functions ---------------------------------------------------------*/
+
 static void OnTxDone(void)
 {
   /* USER CODE BEGIN OnTxDone */
@@ -294,6 +304,7 @@ static void OnRxDone(uint8_t *payload, uint16_t size, int16_t rssi, int8_t LoraS
   radio_debug_status();
   /* Update the State of the FSM*/
   State = RX;
+
   /* Clear BufferRx*/
   memset(BufferRx, 0, MAX_APP_BUFFER_SIZE);
   /* Record payload size*/
@@ -320,6 +331,7 @@ static void OnRxDone(uint8_t *payload, uint16_t size, int16_t rssi, int8_t LoraS
   /* USER CODE END OnRxDone */
 }
 
+
 static void OnTxTimeout(void)
 {
   /* USER CODE BEGIN OnTxTimeout */
@@ -332,9 +344,11 @@ static void OnTxTimeout(void)
   /* USER CODE END OnTxTimeout */
 }
 
+
 static void OnRxTimeout(void)
 {
   /* USER CODE BEGIN OnRxTimeout */
+
   APP_LOG(TS_ON, VLEVEL_L, "OnRxTimeout\n\r");
   /* Update the State of the FSM*/
   State = RX_TIMEOUT;
@@ -344,9 +358,11 @@ static void OnRxTimeout(void)
   /* USER CODE END OnRxTimeout */
 }
 
+
 static void OnRxError(void)
 {
   /* USER CODE BEGIN OnRxError */
+
   APP_LOG(TS_ON, VLEVEL_L, "OnRxError\n\r");
   /* Update the State of the FSM*/
   State = RX_ERROR;
@@ -354,6 +370,7 @@ static void OnRxError(void)
   /* Run PingPong process in background*/
   UTIL_SEQ_SetTask((1 << CFG_SEQ_Task_SubGHz_Phy_App_Process), CFG_SEQ_Prio_0);
   /* USER CODE END OnRxError */
+
 }
 
 /* USER CODE BEGIN PrFD */
@@ -450,6 +467,7 @@ static void PingPong_Process(void)
       APP_LOG(TS_ON, VLEVEL_L, "Slave Rx start\n\r");
       Radio.Rx(RX_TIMEOUT_VALUE);
       break;
+
     default:
       break;
   }
@@ -486,3 +504,4 @@ void radio_debug_status(void)
 }
 
 /* USER CODE END PrFD */
+
