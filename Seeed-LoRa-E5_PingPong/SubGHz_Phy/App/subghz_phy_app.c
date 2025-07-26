@@ -175,15 +175,7 @@ void SubghzApp_Init(void)
   Radio.Init(&RadioEvents);
   APP_LOG(TS_OFF, VLEVEL_M, "Radio initialized\r\n");
   APP_LOG(TS_OFF, VLEVEL_M,
-           "Board config: TxCfg=%d TCXO=%d DCDC=%d\r\n",
-           (int)RBI_GetTxConfig(), (int)RBI_IsTCXO(), (int)RBI_IsDCDC());
-  APP_LOG(TS_OFF, VLEVEL_M,
-           "RFO LP max=%d dBm, HP max=%d dBm\r\n",
-           (int)RBI_GetRFOMaxPowerConfig(RBI_RFO_LP_MAXPOWER),
-           (int)RBI_GetRFOMaxPowerConfig(RBI_RFO_HP_MAXPOWER));
-  APP_LOG(TS_OFF, VLEVEL_M,
-           "RF_FREQUENCY=%u Hz, TX_OUTPUT_POWER=%ddBm\r\n",
-           (unsigned int)RF_FREQUENCY, TX_OUTPUT_POWER);
+
 
   /* USER CODE BEGIN SubghzApp_Init_2 */
   /*calculate random delay for synchronization*/
