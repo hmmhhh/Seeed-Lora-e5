@@ -159,6 +159,11 @@ void radio_debug_status(void);
 /**
   * @brief Print current radio debug information over UART
   */
+void radio_debug_status(void);
+
+/**
+  * @brief Print current radio debug information over UART
+  */
 static void DebugPrintRadioStatus(void);
 
 /* USER CODE END PFP */
@@ -203,6 +208,8 @@ void SubghzApp_Init(void)
   APP_LOG(TS_OFF, VLEVEL_M,
            "RF_FREQUENCY=%u Hz, TX_OUTPUT_POWER=%ddBm\r\n",
            (unsigned int)RF_FREQUENCY, TX_OUTPUT_POWER);
+
+  radio_debug_status();
 
   radio_debug_status();
 
@@ -345,6 +352,7 @@ static void OnTxTimeout(void)
 }
 
 
+
 static void OnRxTimeout(void)
 {
   /* USER CODE BEGIN OnRxTimeout */
@@ -357,6 +365,7 @@ static void OnRxTimeout(void)
   UTIL_SEQ_SetTask((1 << CFG_SEQ_Task_SubGHz_Phy_App_Process), CFG_SEQ_Prio_0);
   /* USER CODE END OnRxTimeout */
 }
+
 
 
 static void OnRxError(void)
