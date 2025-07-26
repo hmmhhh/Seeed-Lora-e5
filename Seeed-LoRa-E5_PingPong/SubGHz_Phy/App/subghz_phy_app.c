@@ -33,6 +33,10 @@
 #include "subghz_phy_version.h"
 #include "radio_board_if.h"
 #include "usart.h"
+#include <stdio.h>
+#include <string.h>
+#include "radio_driver.h"
+
 
 /* USER CODE END Includes */
 
@@ -267,6 +271,7 @@ static void OnTxDone(void)
   APP_LOG(TS_ON, VLEVEL_L, "OnTxDone\n\r");
   /* Update the State of the FSM*/
   State = TX;
+  DebugPrintRadioStatus();
   /* Run PingPong process in background*/
   UTIL_SEQ_SetTask((1 << CFG_SEQ_Task_SubGHz_Phy_App_Process), CFG_SEQ_Prio_0);
   /* USER CODE END OnTxDone */
@@ -285,6 +290,7 @@ static void OnRxDone(uint8_t *payload, uint16_t size, int16_t rssi, int8_t LoraS
   APP_LOG(TS_ON, VLEVEL_L, "RssiValue=%d dBm, Cfo=%dkHz\n\r", rssi, LoraSnr_FskCfo);
   SnrValue = 0; /*not applicable in GFSK*/
 #endif /* USE_MODEM_LORA | USE_MODEM_FSK */
+  DebugPrintRadioStatus();
   /* Update the State of the FSM*/
   State = RX;
   /* Clear BufferRx*/
@@ -319,6 +325,7 @@ static void OnTxTimeout(void)
   APP_LOG(TS_ON, VLEVEL_L, "OnTxTimeout\n\r");
   /* Update the State of the FSM*/
   State = TX_TIMEOUT;
+  DebugPrintRadioStatus();
   /* Run PingPong process in background*/
   UTIL_SEQ_SetTask((1 << CFG_SEQ_Task_SubGHz_Phy_App_Process), CFG_SEQ_Prio_0);
   /* USER CODE END OnTxTimeout */
@@ -330,6 +337,7 @@ static void OnRxTimeout(void)
   APP_LOG(TS_ON, VLEVEL_L, "OnRxTimeout\n\r");
   /* Update the State of the FSM*/
   State = RX_TIMEOUT;
+  DebugPrintRadioStatus();
   /* Run PingPong process in background*/
   UTIL_SEQ_SetTask((1 << CFG_SEQ_Task_SubGHz_Phy_App_Process), CFG_SEQ_Prio_0);
   /* USER CODE END OnRxTimeout */
@@ -341,6 +349,7 @@ static void OnRxError(void)
   APP_LOG(TS_ON, VLEVEL_L, "OnRxError\n\r");
   /* Update the State of the FSM*/
   State = RX_ERROR;
+  DebugPrintRadioStatus();
   /* Run PingPong process in background*/
   UTIL_SEQ_SetTask((1 << CFG_SEQ_Task_SubGHz_Phy_App_Process), CFG_SEQ_Prio_0);
   /* USER CODE END OnRxError */
