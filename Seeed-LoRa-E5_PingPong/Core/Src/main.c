@@ -23,7 +23,11 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "radio_driver.h"
+#include "subghz_phy_app.h"
+#include "usart.h"
+#include <stdio.h>
+#include <string.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -54,6 +58,11 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+static void uart_print(const char *msg)
+{
+  HAL_UART_Transmit(&huart1, (uint8_t *)msg, strlen(msg), HAL_MAX_DELAY);
+}
 
 /* USER CODE END 0 */
 
@@ -88,7 +97,7 @@ int main(void)
   MX_GPIO_Init();
   MX_SubGHz_Phy_Init();
   /* USER CODE BEGIN 2 */
-
+  radio_debug_status();
   /* USER CODE END 2 */
 
   /* Infinite loop */
