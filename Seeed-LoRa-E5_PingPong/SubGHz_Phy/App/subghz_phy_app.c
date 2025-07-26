@@ -172,6 +172,7 @@ void SubghzApp_Init(void)
   RadioEvents.RxError = OnRxError;
 
   Radio.Init(&RadioEvents);
+  APP_LOG(TS_OFF, VLEVEL_M, "Radio initialized\r\n");
 
   /* USER CODE BEGIN SubghzApp_Init_2 */
   /*calculate random delay for synchronization*/
