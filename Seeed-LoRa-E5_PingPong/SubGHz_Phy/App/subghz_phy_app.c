@@ -25,12 +25,14 @@
 #include "radio.h"
 
 /* USER CODE BEGIN Includes */
+
 #include "stm32_timer.h"
 #include "stm32_seq.h"
 #include "utilities_def.h"
 #include "app_version.h"
 #include "subghz_phy_version.h"
 #include "radio_board_if.h"
+
 /* USER CODE END Includes */
 
 /* External variables ---------------------------------------------------------*/
@@ -172,9 +174,19 @@ void SubghzApp_Init(void)
   RadioEvents.RxTimeout = OnRxTimeout;
   RadioEvents.RxError = OnRxError;
 
+
   Radio.Init(&RadioEvents);
   APP_LOG(TS_OFF, VLEVEL_M, "Radio initialized\r\n");
   APP_LOG(TS_OFF, VLEVEL_M,
+           "Board config: TxCfg=%d TCXO=%d DCDC=%d\r\n",
+           (int)RBI_GetTxConfig(), (int)RBI_IsTCXO(), (int)RBI_IsDCDC());
+  APP_LOG(TS_OFF, VLEVEL_M,
+           "RFO LP max=%d dBm, HP max=%d dBm\r\n",
+           (int)RBI_GetRFOMaxPowerConfig(RBI_RFO_LP_MAXPOWER),
+           (int)RBI_GetRFOMaxPowerConfig(RBI_RFO_HP_MAXPOWER));
+  APP_LOG(TS_OFF, VLEVEL_M,
+           "RF_FREQUENCY=%u Hz, TX_OUTPUT_POWER=%ddBm\r\n",
+           (unsigned int)RF_FREQUENCY, TX_OUTPUT_POWER);
 
 
   /* USER CODE BEGIN SubghzApp_Init_2 */
